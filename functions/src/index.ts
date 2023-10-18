@@ -5,4 +5,4 @@ import {onlineCheckout} from "./pesaflow/onlineCheckout";
 const app = express();
 app.post("/onlinecheckout", onlineCheckout);
 
-export const main = onRequest({cors: ["https://portal.kippra.or.ke"]}, app);
+export const main = onRequest({cors: true}, app);
