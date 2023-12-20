@@ -5,4 +5,7 @@ import {onlineCheckout} from "./pesaflow/onlineCheckout";
 const app = express();
 app.post("/onlinecheckout", onlineCheckout);
 
-export const main = onRequest({cors: true}, app);
+export const main = onRequest(
+  {cors: true, maxInstances: 5, memory: "4GiB"},
+  app
+);

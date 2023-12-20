@@ -1,0 +1,18 @@
+{
+  "secureHash": "ZTllODg5MjMwNGNlNWZjOTRjNDI2ZmZmODA4OTJhNWM5NjM3Mzc3YjYzYzhhNDM4ZTUyYjMxZDJhNGVjMzA2MQ==",
+  "apiClientID": "133",
+  "serviceID": "48798",
+  "notificationURL": "https://webhook.site/bfb17e79-a804-4fd9-9478-e9ad80cb8111",
+  "callBackURLOnSuccess": "google.com",
+  "billRefNumber": "SUP_3361",
+  "sendSTK": true,
+  "pictueURL": null,
+  "format": "iframe",
+  "currency": "KES",
+  "amountExpected": "1",
+  "billDesc": "Some bill description",
+  "clientMSISDN": "25472",
+  "clientIDNumber": "11111111",
+  "clientEmail": "john.doe@example.com",
+  "clientName": "John Doe"
+}

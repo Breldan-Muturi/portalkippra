@@ -1,29 +1,40 @@
 import type {Request, Response} from "express";
 import * as logger from "firebase-functions/logger";
 import axios from "axios";
+import {createHmac} from "crypto";
 
 export async function onlineCheckout(req: Request, res: Response) {
   const url = "https://test.pesaflow.com/PaymentAPI/iframev2.1.php";
-  // const serviceID = 48674;
-  // const apiClientID = "dTaI5iILm82p5Frc";
-  // const amount = 1;
-  // const clientIDNumber = 33398260;
-  // const currency = "KES";
-  // const billRefNumber = "breldansCourseInvoice";
-  // const billDesc = "Course";
-  // const clientName = "Breldan Muturi";
-  // const secret = "XV7N7p2fh9GPKf4Wv2RE3S1T0Vrv44dj";
-  // const secureHash = Buffer.from(
-  //   apiClientID +
-  //     amount +
-  //     serviceID +
-  //     clientIDNumber +
-  //     currency +
-  //     billRefNumber +
-  //     billDesc +
-  //     clientName +
-  //     secret
-  // ).toString("base64");
+  const serviceID = "48798";
+  const apiClientID = "133";
+  const amount = "1";
+  const clientIDNumber = "11111111";
+  const currency = "KES";
+  const billRefNumber = "SUP_3361";
+  const billDesc = "Some bill description";
+  const clientName = "John Doe";
+  const secret = "XV7N7p2fh9GPKf4Wv2RE3S1T0Vrv44dj";
+
+  const dataString =
+    apiClientID +
+    amount +
+    serviceID +
+    clientIDNumber +
+    currency +
+    billRefNumber +
+    billDesc +
+    clientName +
+    secret;
+
+  const key = "dTaI5iILm82p5Frc";
+
+  const hmacHash = (key: string, dataString: string) => {
+    let hmac = createHmac("sha256", key);
+    let signed = hmac.update(Buffer.from(dataString, "utf-8")).digest("hex");
+    return signed;
+  };
+
+  const secureHash = hmacHash(key, dataString);
 
   axios({
     method: "POST",
@@ -32,35 +43,41 @@ export async function onlineCheckout(req: Request, res: Response) {
       "Content-Type": "application/json",
     },
     data: {
-      "apiClientID": "111",
-      "serviceID": "48674",
-      "billDesc": "Payment Of Req",
-      "currency": "KES",
-      "billRefNumber": "TEST0001",
-      "clientMSISDN": "25472000000000",
-      "clientName": "John Doe",
-      "clientIDNumber": "00000000",
-      "clientEmail": "abc@email.com",
-      "callBackURLOnSuccess": "https://mycallback.com",
-      "amountExpected": "1000",
-      "notificationURL": "https://example.com",
       "secureHash":
-        "qqLjYEt3Kg2PiRiOyiKwwO17bYIsPd+Bsadfgsagdsdfdsgweweqcwqdwqer2hRS1Kr83rc=",
-      "format": "json",
+        "ZTllODg5MjMwNGNlNWZjOTRjNDI2ZmZmODA4OTJhNWM5NjM3Mzc3YjYzYzhhNDM4ZTUyYjMxZDJhNGVjMzA2MQ==",
+      "apiClientID": apiClientID,
+      "serviceID": serviceID,
+      "notificationURL":
+        "https://webhook.site/bfb17e79-a804-4fd9-9478-e9ad80cb8111",
+      "callBackURLOnSuccess": "google.com",
+      "billRefNumber": billRefNumber,
       "sendSTK": true,
-      "pictureURL": "",
+      "pictueURL": null,
+      "format": "json",
+      "currency": currency,
+      "amountExpected": amount,
+      "billDesc": billDesc,
+      "clientMSISDN": "25472",
+      "clientIDNumber": clientIDNumber,
+      "clientEmail": "john.doe@example.com",
+      "clientName": clientName,
     },
   })
     .then((response: any) => {
+      logger.info("secureHash:", secureHash);
       res.status(200).json(response.data);
+      if (
+        response.data.status === 422 &&
+        response.data.message === "Invoice already paid"
+      ) {
+        return res.status(422).json(response.data);
+      } else {
+        return res.status(200).json(response.data);
+      }
     })
     .catch((error: any) => {
-      const message = (error as Error).message;
-      logger.error("Error with pesaflow: ", message);
-      res.status(401).json({
-        message: message
-          ? `"Error with pesaflow: ", ${message}`
-          : "An error occurred",
-      });
+      logger.error(error);
+      logger.info("secureHash:", secureHash);
+      res.status(401).json({error});
     });
 }
